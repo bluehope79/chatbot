@@ -1,20 +1,23 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <style>
+        <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
       form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+	  #userList {border-radius:4px;left:70%;background: rgb(130, 224, 255); padding: 3px; position: fixed; top: 0px; width: 100%;}
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
+      #messages li:nth-child(even) { background-color : darkgray; padding:6px 10px; width:50%; height: auto;style="font-weight:bold"; font-size:14pt; border-radius:10px;word-break:break-all;}
       #messages { margin-bottom: 40px }
-	  #chu {background: #ff2; position: absolute; bottom: 40px; width:30%; height: 40px;
-			color: #f00; style="font-weight:bold"; font-size:160%;}
-			.setDiv {padding-top: 0px; text-align: center;}
+	  #birong1 {text-align: right !important;}
+	  #birong2 {background: rgb(255, 255, 255) !important; text-align: right !important;    display:inline-block!important;width:25% !important;}
+	  #birong3 {background: rgb(130, 224, 255) !important; text-align: right !important;    display:inline-block !important; width:50% !important;}
+	  
+     .setDiv {padding-top: 0px; text-align: center;}
       .mask {position:absolute;left:0;top:0;z-index:9999;background-color:#000;display:none;}
       .window {display: none;background-color: #ffffff;height: 220px;z-index:99999;}
       .close {
@@ -49,12 +52,10 @@
          margin-top : 8px;
          margin-bottom : 4px;
       }
-     .userList {position:absolute; bottom: 40px; left:70%; background: rgb(130, 224, 255);argin-bottom:20px;padding-left:20px; margin-right:10px;width:30%;border-radius:10px;
-     height:auto;
-     
-     }
+	  #typingnotice {color : #00f;}
     </style>
-	<div class="setDiv">    <!--로그인 폼!--> 
+   
+    <div class="setDiv">
       <div class="mask"></div>
       <div class="window">
           <h2>대화명 설정</h2>
@@ -64,23 +65,24 @@
          <p class="tmText">한글 1~6자, 영문 대소문자, 숫자 2~12자를 사용할 수 있습니다.</p>
       </div>
    </div>
+    <div id="userList"><li>fewfew</li></div>
   </head>
   <body>
     <ul id="messages"></ul>
-	<input id="chu" type="text" readonly/>
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript">
       $(function () {
         var socket = io();
-		var typing = false;
-		var chec = 0; 	/// 채팅 볼 권한 확인
-
-		
-		function wrapWindowByMask(){
+      var chec = 0;
+      var typing = false;
+      var timeout;
+      <!--핫솔이코드추가-->
+      function wrapWindowByMask(){
          var maskHeight = $(document).height();
          var maskWidth = $(window).width();
          $('.mask').css({'width':maskWidth,'height':maskHeight});
@@ -91,18 +93,19 @@
          $('.window').css({'left':left,'top':top, 'position':'absolute'});
          $('.window').show();
        }
-      wrapWindowByMask(); // 창띄우기
-		
-			//timefunction 함수 제거
-			
-		//keyup 이벤트 발생 시 input 폼에 값이 들어 있을 경우에 타이핑 표시
-		$('#m').keyup(function() {
+      wrapWindowByMask();
+      <!--핫솔이 코드추가끝-->
+      
+      
+      <!-- 키보드 입력시 typing 값을 true로 바꾸고 이를 서버에 알려준다 0.5초동안 입력이 없을 시 타임아웃발생-->
+      $('#m').keyup(function() {
          typing=true;
          if($('#m').val() == ''){socket.emit('typing', false);}
          else{socket.emit('typing', typing);}
       });
-		<!-- 자기 자신의 메시지는 메시지보낼시 먼저 append시켜준다 -->
-        $('form').submit(function(){                       
+      <!-- 자기 자신의 메시지는 메시지보낼시 먼저 append시켜준다 -->
+      $('form').submit(function(){
+       socket.emit('typing', false);     
          var mymsg = $('#m').val();
          if(mymsg!= ''){
             $('#messages').append($('<li>').text('나'));             // 나중에 고친다. append
@@ -118,8 +121,9 @@
          $('#m').focus();   /// 나중에 추가!!
          return false;
          }
-        });  
-		 $('.window .close').click(function (e) {
+        });                     
+      <!--핫솔이 코드추가-->  
+      $('.window .close').click(function (e) {
          e.preventDefault();
        if($('#username').val() != ''){
          socket.emit('new user', $('#username').val(), function(data) {
@@ -127,32 +131,60 @@
          chec = 1;
                $('.mask, .window').hide();
             } 
-            else {alert("이미 있는 닉네임 입니다.");}
+            else if(!data) 
+         {alert("이미 있는 닉네임 입니다.");}
          });
        }
        else
          alert("닉네임을 입력해 주세요");
-      });		// 닉네임 입력 받고 값 전달
-		
-		
-       socket.on('chat message', function(msg, name){
+      });
+     <!--핫솔이 코드추가끝-->
+     
+        socket.on('chat message', function(msg, name){
         if(chec == 0) return false;
-        $('#messages').append($('<li>').text(name));
+		if(name === '비룡'){
+			$('#messages').append($("<li id='birong1'>").text(name));
+			$('#messages').append($("<li id='birong2'>"));
+			$('#messages').append($("<li id='birong2'>"));
+			$('#messages').append($("<li id='birong3'>").text(msg));
+		}
+        else{$('#messages').append($('<li>').text(name));
         $('#messages').append($('<li>').text(msg));
+		}
         window.scrollTo(0, document.body.scrollHeight);
         });
-		
-		
-		// 타이핑 중임을 알릴 때 유저 닉네임 표시 기능 추가
-		socket.on('typing', function(nick,data){
-      if(data!=false){
-         $('#chu').val(nick+' is typing...');
-      }
-      else
-      {
-         $('#chu').val('');
-      }
+      
+    <!-- 리스트 출력-->
+      socket.on('usernames', function(data){
+	   $('#userList').text('');
+		var i;
+         for (i = 0 ; i < data.userList.length;i++) {
+            $('#userList').append($('<li>').text(data.userList[i]));
+         }
+        });
+      
+      <!-- 서버로 부터 typing 메시지의 data가 false가 아닐시 유저가 타이핑 중이라는 글 출력-->
+      socket.on('typing', function(data){
+			var i, j;
+			$('#userList').text('');
+			for( i = 0 ; i < data.userList.length;i++){
+				var na = data.userList[i];
+				var c = false;
+				for(j = 0; j < data.typingList.length;j++){
+					var k = na.indexOf(data.typingList[j]);
+					if(k == 0) {c = true;}
+					//$('#userList').append($('<li>').text(data.userList[i]+'  '+data.typingList[j]+'   '+k));
+				}
+				if( c == true){ //타이핑 리스트에 있을때
+					$('#userList').append($('<li>').append(data.userList[i], '<a id="typingnotice"> is typing...'));
+				}
+				else{ // 타이핑 리스트에 없을 때
+					$('#userList').append($('<li>').text(data.userList[i]));
+				}
+			}
+			
       });
+
       });
     </script>
   </body>
