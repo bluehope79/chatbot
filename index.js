@@ -5,9 +5,14 @@ var port = process.env.PORT || 3000;
 var Client = require('mongodb').MongoClient;
 var db;
 
+var docList = new Array();
 var userList = new Array();
 var typingList  = new Array(); // 타이핑 중인사람 배열 선언
 var advice=0;   // flag : 1 메뉴 추천    flag : 2 재류 추천
+var sebu = 0;
+var sebulist=0;
+
+
 
 Client.connect('mongodb://localhost:27017/Biryong', function(error, database){
     if(error) {
@@ -72,7 +77,7 @@ io.on('connection', function(socket){
 		else{
 			time=4;
 		}
-   }
+   } 
    
   //핫솔이 new user 추가//
   socket.on("new user", function(data, callback) {
@@ -110,49 +115,31 @@ io.on('connection', function(socket){
     var k = msg.indexOf('세부추천');
     var l = msg.indexOf('관리자모드');
 	var h = msg.indexOf('됐어');
-	
-    if( i != -1 && admin == 0 && master == 0)
-    {
+    if( i != -1 && admin == 0 && master == 0){
        if(j!=-1 && advice == 0){    
-         socket.broadcast.emit('chat message', msg, socket.nickname); 
-		 
-		 //advice = 1; 
-		 db.collection("foods").stats(function(err, stats) {
-		 console.log(stats.count);
-		 
-		 var query = {};
-		 var cursor = db.collection('foods').find(query).skip(Math.floor(Math.random() * stats.count)).limit(1);
-        cursor.each(function(err,doc){
-            if(err){
-                console.log(err);
-            }else{
-                if(doc != null){
-					timere();
-                    console.log(doc);
-					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡'); 
-                }
-            }
-        });
-		})
+         socket.broadcast.emit('chat message', msg, socket.nickname);
+         io.sockets.emit('chat message', '메뉴추천/', '비룡');
+		 advice = 1;
        }
        else if(k!=-1 && advice == 0){    
-         socket.broadcast.emit('chat message', msg, socket.nickname);    // 추가해야할것
+         socket.broadcast.emit('chat message', msg, socket.nickname);
          io.sockets.emit('chat message', '음식의 종류(한식:1,중식:2,일식:3,양식:4,디저트:5), 가격의 상한선을 입력해주세요.(/로 구분)', '비룡');
          advice=2;
-		 
-		 
        }
        else if(l!=-1){    
          socket.emit('chat message','관리자 비밀 번호를 입력하세요', '비룡');//자신에게만 보낼때
          admin = 1;
        }
 	   else if(h != -1){
+		       socket.broadcast.emit('chat message', msg, socket.nickname);
 		 if(advice == 0){
-			socket.emit('chat message','선택하신 추천이 없습니다. 위 메뉴중 하나를 선택해주세요.', '비룡');//자신에게만 보낼때
+			io.sockets.emit('chat message','선택하신 추천이 없습니다. 위 메뉴중 하나를 선택해주세요.', '비룡');//자신에게만 보낼때
 		 }
 		 else{
 			advice = 0;	
-			socket.emit('chat message','추천을 종료합니다.', '비룡');//자신에게만 보낼때			 
+			sebu = 0;
+			sebulist = 0;
+			io.sockets.emit('chat message','추천을 종료합니다.', '비룡');//자신에게만 보낼때			 
 		 } 
 
 	   }
@@ -229,11 +216,10 @@ io.on('connection', function(socket){
 	  }
     }
     else if(advice==1){
+		socket.broadcast.emit('chat message', msg, socket.nickname);
        //////////////////////////////
 	   
-	   db.collection("foods").stats(function(err, stats) {
-		 console.log(stats.count);
-		})
+	   
 	   
 	   
 	   
@@ -244,31 +230,52 @@ io.on('connection', function(socket){
 	   //////////////////////////////////
     }
 	 else if(advice==2){
-      var strarray=msg.split('/');
-      timere();
-      var when=time;    
-      var query = {type:parseInt(strarray[0]), money:{'$lt':parseInt(strarray[1])} };
-      var cursor = db.collection('foods').find(query);
-      var food_name;
-      var food_money;
-      var food_recipe;
-      var chch = 0;
-      cursor.each(function(err,doc){
-        if(err){
-            console.log(err);
-        }
-         else{
-                if(doc != null){
-					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡'); 
-                }
-				else 
-					socket.emit('chat message','만족 하는 음식이 없습니다. 다른 조건으로 입력해 주세요.', '비룡');   
-            }
-        });
+		socket.broadcast.emit('chat message', msg, socket.nickname);
+		if(sebu == 0){
+			var strarray=msg.split('/');
+			var query = {type:parseInt(strarray[0]), money:{'$lt':parseInt(strarray[1])} };
+			var cursor = db.collection('foods').find(query);
+			cursor.each(function(err,doc){
+				if(err){
+						console.log(err);
+				}
+				else{
+					if(doc != null){
+						var foodk = doc.name + '/'+doc.money+'/'+doc.ingredients+'/'+doc.recipe;
+						var p = docList.indexOf(foodk);
+						if( p == -1)
+							docList.push(foodk);  
+					}
+				}
+			});
+			io.sockets.emit('chat message', '리스트를 불러왔습니다. 보실려면 "다음", 필요없으시면 "비룡아 됐어"라고 말씀해주세요.', '비룡');
+			sebu = 1;
+		}
+		else{
+			var p = msg.indexOf('다음');
+			if(p != -1){
+				if(sebulist<docList.length ){
+					var strarray=docList[sebulist].split('/');
+					io.sockets.emit('food recipe',{ strarray : strarray});
+					//io.sockets.emit('chat message','이름: '+strarray[0]+'\n 가격: '+strarray[1]+', 재료: '+strarray[2]+', 레시피: '+strarray[3], '비룡'); 
+					sebulist++;
+				}
+				else{
+					sebu = 0;
+					sebulist = 0;
+					docList= new Array();
+					io.sockets.emit('chat message','조건에 만족하는 음식을 다 보셨습니다. 다른 조건을 입력하시거나, 그만 보시려면 "비룡아 됐어"라고 말씀해 주세요', '비룡'); 
+				}
+			}
+			else{
+				io.sockets.emit('chat message', '뭐라고 하시는지 모르겠습니다.', '비룡');
+			}
+		}  
     }
     else 
       socket.broadcast.emit('chat message', msg, socket.nickname);
 	updateNicknames();
+	
   });
   
   //typing emit이 올시에 브로드캐스트방식으로 typing emit 클라이언트에게 보내기
@@ -283,6 +290,7 @@ io.on('connection', function(socket){
         var i = typingList.indexOf(nickname);
 		if(i != -1)
         typingList.splice(i,1);
+
    }
    updateNicknames();
   });
