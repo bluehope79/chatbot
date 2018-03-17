@@ -52,6 +52,7 @@
          margin-top : 8px;
          margin-bottom : 4px;
       }
+	  #typingnotice {color : #00f;}
     </style>
    
     <div class="setDiv">
@@ -175,7 +176,7 @@
 					//$('#userList').append($('<li>').text(data.userList[i]+'  '+data.typingList[j]+'   '+k));
 				}
 				if( c == true){ //타이핑 리스트에 있을때
-					 $('#userList').append($('<li>').text(data.userList[i]+' is typing....'));
+					$('#userList').append($('<li>').append(data.userList[i], '<a id="typingnotice"> is typing...'));
 				}
 				else{ // 타이핑 리스트에 없을 때
 					$('#userList').append($('<li>').text(data.userList[i]));
