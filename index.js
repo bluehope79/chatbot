@@ -60,7 +60,7 @@ io.on('connection', function(socket){
 	function timere() {   // 접속 중인 멤버체크를 위한 메소드 구현 중
 		var d = new Date();
 		var n = d.getHours(); 
-		if(n>=6&&n>=9){
+		if(n>=6&&n<=9){
 			time=1;
 		}
 		else if(n<=14){
@@ -104,34 +104,63 @@ io.on('connection', function(socket){
    /////////////////////
    
   socket.on('chat message', function(msg){
-     //자기자신을 제외한 클라이언트 들에게 emit을 보내게 바꾸어줌
+    //자기자신을 제외한 클라이언트 들에게 emit을 보내게 바꾸어줌
     var i = msg.indexOf('비룡');
     var j = msg.indexOf('메뉴추천');
     var k = msg.indexOf('세부추천');
     var l = msg.indexOf('관리자모드');
-
+	var h = msg.indexOf('됐어');
 	
     if( i != -1 && admin == 0 && master == 0)
     {
        if(j!=-1 && advice == 0){    
-         socket.broadcast.emit('chat message', msg, socket.nickname);     // 추가해야할것
-         io.sockets.emit('chat message', '메뉴추천/', '비룡');
-		 advice = 1;
+         socket.broadcast.emit('chat message', msg, socket.nickname); 
+		 
+		 //advice = 1; 
+		 db.collection("foods").stats(function(err, stats) {
+		 console.log(stats.count);
+		 
+		 var query = {};
+		 var cursor = db.collection('foods').find(query).skip(Math.floor(Math.random() * stats.count)).limit(1);
+        cursor.each(function(err,doc){
+            if(err){
+                console.log(err);
+            }else{
+                if(doc != null){
+					timere();
+                    console.log(doc);
+					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡'); 
+                }
+            }
+        });
+		})
        }
        else if(k!=-1 && advice == 0){    
          socket.broadcast.emit('chat message', msg, socket.nickname);    // 추가해야할것
          io.sockets.emit('chat message', '음식의 종류(한식:1,중식:2,일식:3,양식:4,디저트:5), 가격의 상한선을 입력해주세요.(/로 구분)', '비룡');
          advice=2;
+		 
+		 
        }
        else if(l!=-1){    
          socket.emit('chat message','관리자 비밀 번호를 입력하세요', '비룡');//자신에게만 보낼때
          admin = 1;
-        
        }
+	   else if(h != -1){
+		 if(advice == 0){
+			socket.emit('chat message','선택하신 추천이 없습니다. 위 메뉴중 하나를 선택해주세요.', '비룡');//자신에게만 보낼때
+		 }
+		 else{
+			advice = 0;	
+			socket.emit('chat message','추천을 종료합니다.', '비룡');//자신에게만 보낼때			 
+		 } 
+
+	   }
        else{
          socket.broadcast.emit('chat message', msg, socket.nickname); 
          io.sockets.emit('chat message', '안녕하세요? 메뉴 추천 받으시려면 "비룡아 메뉴추천", 가지고 음식의 종류, 가격대로 추천 받으시려면 "비룡아 세부추천", 관리자이시면 "비룡아 관리자모드" 를 입력해주세요!', '비룡');
-       }         
+       }
+	 
     }
 	else if(admin == 1){
       if(msg==dbpass){  
@@ -167,32 +196,19 @@ io.on('connection', function(socket){
          master_revise=1;
       }
       else if(master_input == 1){
-		 var query = {name:msg};
-		 var cursor = db.collection('foods').find(query); 
-
-		 ////////////////////////
-		 cursor.each(function(err,doc){
-            if(err){
-                console.log(err);
-            }else{
-                if(doc != null){// 있을 때
-                    socket.emit('chat message','이미 있는 레시피 입니다.', '비룡');  // 현재 테스트중
-                }
-				else{  // 없을 때
-					var strarray=msg.split('/');
-					var input={name:strarray[0],type:parseInt(strarray[1]),time:parseInt(strarray[2]),ingredients:strarray[3],money:parseInt(strarray[4]),recipe:strarray[5]};
-					db.collection('foods').insert(input);
-					socket.emit('chat message',strarray[0]+'을(를) 레시피에 입력하였습니다.:', '비룡');	
-				}
-            }
-        }); 
-
-         master_input=0;
+			var strarray=msg.split('/');
+			var input={name:strarray[0],type:parseInt(strarray[1]),time:parseInt(strarray[2]),ingredients:strarray[3],money:parseInt(strarray[4]),recipe:strarray[5]};
+			db.collection('foods').insert(input);
+			socket.emit('chat message',strarray[0]+'을(를) 레시피에 입력하였습니다.:', '비룡');	
+			socket.emit('chat message','"삽입", "삭제", "수정" 중 원하시는 기능을 입력하세요.(관리자 모드 종료는 관리자종료라고 말씀해주세요)', '비룡');
+			master_input=0;
       }
       else if(master_del == 1){ // 삭제
          var query = {name:msg};
-		 var cursor = db.collection('foods').find(query); /////////////////////////////
+		 var cursor = db.collection('foods').find(query);
          db.collection('foods').remove(query);
+		 socket.emit('chat message',msg+'을(를) 삭제하였습니다.:', '비룡');	
+		socket.emit('chat message','"삽입", "삭제", "수정" 중 원하시는 기능을 입력하세요.(관리자 모드 종료는 관리자종료라고 말씀해주세요)', '비룡');
          master_del=0;
       }
       else if(master_revise == 1){
@@ -203,40 +219,52 @@ io.on('connection', function(socket){
          var operator = {name:strarray[1],type:parseInt(strarray[2]),time:parseInt(strarray[3]),ingredients:strarray[4],money:parseInt(strarray[5]),recipe:strarray[6]};
          // 수정 옵션 : upsert 가 true 일 경우 query 대상이 존재하면 update, 없으면 insert 처리
          var options = {upsert:true};
-          var chch = db.collection('foods').update(query,operator,options)
-		  socket.emit('chat message',chch, '비룡');//자신에게만 보낼때
+         db.collection('foods').update(query,operator,options)
+		 socket.emit('chat message',strarray[0]+'을(를) 수정하였습니다.:', '비룡');	
+		 socket.emit('chat message','"삽입", "삭제", "수정" 중 원하시는 기능을 입력하세요.(관리자 모드 종료는 관리자종료라고 말씀해주세요)', '비룡');
          master_revise=0;
       }
 	  else if(input == -1 && del == -1 && revise == -1){
 		 socket.emit('chat message','잘못 선택하셨습니다.','비룡');
 	  }
     }
-    else if(advice==2){
-		var strarray=msg.split('/');
-		timere();
-		var when=time;    
-		var query = {type:parseInt(strarray[0]), time:when, money:{'$lt':parseInt(strarray[1])} };
-		var cursor = db.collection('foods').find(query);
-		var food_name;
-		var food_money;
-		var food_recipe;
-		var food_ingredients;
-		
-		console.log("실행테스트");
-		cursor.each(function(err,doc){
-            if(err){
-                console.log(err);
-            }
-			else{
+    else if(advice==1){
+       //////////////////////////////
+	   
+	   db.collection("foods").stats(function(err, stats) {
+		 console.log(stats.count);
+		})
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   //////////////////////////////////
+    }
+	 else if(advice==2){
+      var strarray=msg.split('/');
+      timere();
+      var when=time;    
+      var query = {type:parseInt(strarray[0]), money:{'$lt':parseInt(strarray[1])} };
+      var cursor = db.collection('foods').find(query);
+      var food_name;
+      var food_money;
+      var food_recipe;
+      var chch = 0;
+      cursor.each(function(err,doc){
+        if(err){
+            console.log(err);
+        }
+         else{
                 if(doc != null){
-					food_name=doc.name;
-					food_money=doc.money;
-					food_recipe=doc.recipe;
-					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡');	
+					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡'); 
                 }
+				else 
+					socket.emit('chat message','만족 하는 음식이 없습니다. 다른 조건으로 입력해 주세요.', '비룡');   
             }
         });
-        advice=0;
     }
     else 
       socket.broadcast.emit('chat message', msg, socket.nickname);
@@ -252,8 +280,9 @@ io.on('connection', function(socket){
       }
    }
    else{
-            var i = typingList.indexOf(nickname);
-            typingList.splice(i,1);
+        var i = typingList.indexOf(nickname);
+		if(i != -1)
+        typingList.splice(i,1);
    }
    updateNicknames();
   });
