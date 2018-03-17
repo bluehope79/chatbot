@@ -60,7 +60,7 @@ io.on('connection', function(socket){
 	function timere() {   // 접속 중인 멤버체크를 위한 메소드 구현 중
 		var d = new Date();
 		var n = d.getHours(); 
-		if(n>=6||n>=9){
+		if(n>=6&&n>=9){
 			time=1;
 		}
 		else if(n<=14){
@@ -126,7 +126,7 @@ io.on('connection', function(socket){
        else if(l!=-1){    
          socket.emit('chat message','관리자 비밀 번호를 입력하세요', '비룡');//자신에게만 보낼때
          admin = 1;
-         console.log(n);
+        
        }
        else{
          socket.broadcast.emit('chat message', msg, socket.nickname); 
@@ -139,7 +139,7 @@ io.on('connection', function(socket){
             socket.emit('chat message','관리자님 안녕하세요. "삽입", "삭제", "수정" 중 원하시는 기능을 입력하세요.(관리자 모드 종료는 관리자종료라고 말씀해주세요)', '비룡');
         }
       else{
-         socket.emit('chat message','비밀번호 불일치!', '비룡');
+         socket.emit('chat message','비밀번호 불일치하였습니다. 관리자모드를 종료 합니다.', '비룡');
       }
       admin=0;
     }
@@ -167,17 +167,31 @@ io.on('connection', function(socket){
          master_revise=1;
       }
       else if(master_input == 1){
-         var strarray=msg.split('/');
-         var input={name:strarray[0],type:parseInt(strarray[1]),time:parseInt(strarray[2]),ingredients:strarray[3],money:parseInt(strarray[4]),recipe:strarray[5]};
-         
-         // 삽입
-         var chch = db.collection('foods').insert(input);
-		 socket.emit('chat message',chch, '비룡');//자신에게만 보낼때
+		 var query = {name:msg};
+		 var cursor = db.collection('foods').find(query); 
+
+		 ////////////////////////
+		 cursor.each(function(err,doc){
+            if(err){
+                console.log(err);
+            }else{
+                if(doc != null){// 있을 때
+                    socket.emit('chat message','이미 있는 레시피 입니다.', '비룡');  // 현재 테스트중
+                }
+				else{  // 없을 때
+					var strarray=msg.split('/');
+					var input={name:strarray[0],type:parseInt(strarray[1]),time:parseInt(strarray[2]),ingredients:strarray[3],money:parseInt(strarray[4]),recipe:strarray[5]};
+					db.collection('foods').insert(input);
+					socket.emit('chat message',strarray[0]+'을(를) 레시피에 입력하였습니다.:', '비룡');	
+				}
+            }
+        }); 
+
          master_input=0;
       }
-      else if(master_del == 1){
-          var query = {name:msg};
-         // 삭제
+      else if(master_del == 1){ // 삭제
+         var query = {name:msg};
+		 var cursor = db.collection('foods').find(query); /////////////////////////////
          db.collection('foods').remove(query);
          master_del=0;
       }
@@ -197,44 +211,36 @@ io.on('connection', function(socket){
 		 socket.emit('chat message','잘못 선택하셨습니다.','비룡');
 	  }
     }
-    else if(advice==1){
-       var strarray=msg.split('/');
-       var d = new Date();
-       var n = d.getHours(); 
-       var when;
-      if(n>=6||n>=9){
-         when=1;
-      }
-      else if(n<=14){
-         when=2;
-      }
-      else if(n<=20){
-         when=3;
-      }
-      else{
-         when=4;
-      }
-      
-      var query = {type:parseInt(strarray[0]), time:when, money:{'$lt':parseInt(strarray[1])} };
-        var cursor = db.collection('foods').find(query);
-       cursor.each(function(err,doc){
+    else if(advice==2){
+		var strarray=msg.split('/');
+		timere();
+		var when=time;    
+		var query = {type:parseInt(strarray[0]), time:when, money:{'$lt':parseInt(strarray[1])} };
+		var cursor = db.collection('foods').find(query);
+		var food_name;
+		var food_money;
+		var food_recipe;
+		var food_ingredients;
+		
+		console.log("실행테스트");
+		cursor.each(function(err,doc){
             if(err){
                 console.log(err);
-            }else{
+            }
+			else{
                 if(doc != null){
-               console.log(doc);
-                    socket.emit('chat message','이름:'+doc.name, '비룡');  // 현재 테스트중
+					food_name=doc.name;
+					food_money=doc.money;
+					food_recipe=doc.recipe;
+					socket.emit('chat message','이름: '+doc.name+', 가격: '+doc.money+', 재료: '+doc.ingredients+', 레시피: '+doc.recipe, '비룡');	
                 }
             }
         });
-
-
-       advice=0;
+        advice=0;
     }
-
     else 
       socket.broadcast.emit('chat message', msg, socket.nickname);
-   updateNicknames();
+	updateNicknames();
   });
   
   //typing emit이 올시에 브로드캐스트방식으로 typing emit 클라이언트에게 보내기
