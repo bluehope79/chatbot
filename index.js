@@ -33,17 +33,14 @@ io.on('connection', function(socket){
      
    });
   socket.on('chat message', function(msg){
-<<<<<<< HEAD
-     //ÀÚ±âÀÚ½ÅÀ» Á¦¿ÜÇÑ Å¬¶óÀÌ¾ðÆ® µé¿¡°Ô emitÀ» º¸³»°Ô ¹Ù²Ù¾îÁÜ
     socket.broadcast.emit('chat message', msg);
-=======
      //ìžê¸°ìžì‹ ì„ ì œì™¸í•œ í´ë¼ì´ì–¸íŠ¸ ë“¤ì—ê²Œ emitì„ ë³´ë‚´ê²Œ ë°”ê¾¸ì–´ì¤Œ
     socket.broadcast.emit('chat message', msg);
   });
   //typing emitì´ ì˜¬ì‹œì— ë¸Œë¡œë“œìºìŠ¤íŠ¸ë°©ì‹ìœ¼ë¡œ typing emit í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë³´ë‚´ê¸°
   socket.on('typing', function(msg){
 	 socket.broadcast.emit('typing', msg);
->>>>>>> nickname
+
   });
 });
 
