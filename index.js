@@ -9,7 +9,8 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
   socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+     //자기자신을 제외한 클라이언트 들에게 emit을 보내게 바꾸어줌
+    socket.broadcast.emit('chat message', msg);
   });
 });
 
