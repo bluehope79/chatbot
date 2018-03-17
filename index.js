@@ -33,15 +33,13 @@ io.on('connection', function(socket){
      
    });
   socket.on('chat message', function(msg){
-    socket.broadcast.emit('chat message', msg);
      //자기자신을 제외한 클라이언트 들에게 emit을 보내게 바꾸어줌
-    socket.broadcast.emit('chat message', msg);
+    socket.broadcast.emit('chat message', msg, socket.nickname);	//닉네임 추가
   });
   //typing emit이 올시에 브로드캐스트방식으로 typing emit 클라이언트에게 보내기
-  socket.on('typing', function(msg){
-	 socket.broadcast.emit('typing', msg);
-
-  });
+  socket.on('typing', function(msg){	
+    socket.broadcast.emit('typing', socket.nickname, msg);
+  });	// 닉네임 추가
 });
 
 http.listen(port, function(){
