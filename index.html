@@ -2,39 +2,39 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-	<style>
-		* { margin: 0; padding: 0; box-sizing: border-box; }
-		html, body {height:100%;}
-		#top {
-			top:0px;
-			height:92%;
-			width:100%;
-			position:fiexd;
-			}
-		#right {
-		    height:99%;
-			bottom:0px;
-			width:15%;
-			background-color: white;
-			float:right;
-			border-radius: 15px 15px 15px 15px;}
-		#left {
-			width:85%;
-			height: 100%;
-			background:#A0C0D7;
-			overflow-y:scroll;
-			border-radius: 15px 15px 0px 0px;
-			}
-		#bottom {
-			width:100%;
-			height:8%;
-			float:bottom;}
-		form { background-color: #665E58; padding: 5px; height:100%; width: 100%; }
-		form input { border: none; padding: 10px; width: 90%; height:90%; font: 13px Helvetica, Arial;
-					border-radius: 5px 0px 0px 5px; margin-top:5px;}
-		form button { width: 9%; background: #eee; border: none; height:90%; font: 13px serif, Arial;
-					border-radius: 0px 5px 5px 0px; color:black; margin-top:5px; }
-	.setDiv {padding-top: 0px; text-align: center;}
+   <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {height:100%;}
+      #top {
+         top:0px;
+         height:92%;
+         width:100%;
+         position:fiexd;
+         }
+      #right {
+          height:99%;
+         bottom:0px;
+         width:15%;
+         background-color: white;
+         float:right;
+         border-radius: 15px 15px 15px 15px;}
+      #left {
+         width:85%;
+         height: 100%;
+         background:#A0C0D7;
+         overflow-y:scroll;
+         border-radius: 15px 15px 0px 0px;
+         }
+      #bottom {
+         width:100%;
+         height:8%;
+         float:bottom;}
+      form { background-color: #665E58; padding: 5px; height:100%; width: 100%; }
+      form input { border: none; padding: 10px; width: 90%; height:90%; font: 13px Helvetica, Arial;
+               border-radius: 5px 0px 0px 5px; margin-top:5px;}
+      form button { width: 9%; background: #eee; border: none; height:90%; font: 13px serif, Arial;
+               border-radius: 0px 5px 5px 0px; color:black; margin-top:5px; }
+   .setDiv {padding-top: 0px; text-align: center;}
       .mask {position:absolute;left:0;top:0;z-index:9999;background-color:#000;}
       .window {display: none;background-color: #ffffff;height: 220px;z-index:99999;}
       .close {
@@ -69,122 +69,120 @@
          margin-top : 8px;
          margin-bottom : 4px;
       }
-	  #typingnotice {color : red;}
-	  ul {list-style:none;
-		margin:0;
-		padding:0;
-		margin-top:40px;
-		}
-	  li {
-		padding 20px;
-		
-		margin-bottom:2px;
-	  }
-	  #messages li:nth-child(even) { width:51%;display:inline-block; padding:6px 10px; height: auto;style="font-weight:bold"; 
-									font-size:14pt; border-radius:10px;word-break:break-all;}
-	  #user{margin:20px;
-		display:block;
-		font-weight:bold;
-		}
-	  #my, #mychat {
-		float:right;
-		color:#000;}
-	  #my {width:51%;
-			text-align:right;
-			font: 20px Helvetica, Arial;
-			padding-right:20px;
-		}
-	  #mychat{
-		background-color:transparent;
-		text-shadow: #FEFF00 0px 0px 5px 16px;
-		text-align:right;}
-	  #someone, #someonechat, #birong2 {
-		float:left;
-		color:#000;
-	  }
-	  #birong1 {
-		font-weight:bolder;
-		color:#F36313;
-		float:left;
-		text-shadow: #F36313 1px 1px 1px 0px;}
-	  #someone, #birong1{
-	  padding-left:20px;
-	  width:51%;
-	  font: 20px boldic, Arial;}
+     #typingnotice {color : red;}
+     ul {list-style:none;
+      margin:0;
+      padding:0;
+      margin-top:40px;
+      }
+     li {
+      padding 20px;
+      
+      margin-bottom:2px;
+     }
+     #messages li:nth-child(even) { width:51%;display:inline-block; padding:6px 10px; height: auto;style="font-weight:bold"; 
+                           font-size:14pt; border-radius:10px;word-break:break-all;}
+     #user{margin:20px;
+      display:block;
+      font-weight:bold;
+      }
+     #my, #mychat {
+      float:right;
+      color:#000;}
+     #my {width:51%;
+         text-align:right;
+         font: 20px Helvetica, Arial;
+         padding-right:20px;
+      }
+     #mychat{
+      background-color:transparent;
+      text-shadow: #FEFF00 0px 0px 5px 16px;
+      text-align:right;}
+     #someone, #someonechat, #birong2 {
+      float:left;
+      color:#000;
+     }
+     #birong1 {
+      font-weight:bolder;
+      color:#F36313;
+      float:left;
+      text-shadow: #F36313 1px 1px 1px 0px;}
+     #someone, #birong1{
+     padding-left:20px;
+     width:51%;
+     font: 20px boldic, Arial;}
 
-	  #someonechat {
-		text-shadow: #FFFFFF 0px 0px 5px 16px;
-	  }
-	  #birong2 {
-		text-shadow: #FFFFFF 0px 0px 5px 15px;}
-	  #mychat, #someonechat, #birong2 {
-		font: 20px Helvetica, Arial;
-		line-height:130%;}
-	  #time {
-		font: 10px Arial;
-		text-shadow:none;
-		color:white;
-	  }
-	  .heading {
-		
-		width:85%;
-		position:fixed;
-		border-radius: 15px 15px 0px 0px;
-		margin-bottom: 20px;
-		background-color: #665E58;
-		color : #fff;
-		padding: 10px 15px;
-		text-align:center;
-		}
-	  .online {
-		background:#665E58;
-		border-radius: 15px 15px 0px 0px;
-		text-align:center;
-		padding: 10px 15px;
-		color: white;
-		font-weight:bold;	
-	  }
-	  #star {
-	  color:#21FF0B;}
-	  #circle {
-		color:#3C61C8;
-	  }
-	  #highlight {
-	font-size:15px;}
-	#userList{font-size:10px;}
-	#highlight {
-		font-weight:bold;
-		color:#4794D3;
+     #someonechat {
+      text-shadow: #FFFFFF 0px 0px 5px 16px;
+     }
+     #birong2 {
+      text-shadow: #FFFFFF 0px 0px 5px 15px;}
+     #mychat, #someonechat, #birong2 {
+      font: 20px Helvetica, Arial;
+      line-height:130%;}
+     #time {
+      font: 10px Arial;
+      text-shadow:none;
+      color:white;
+     }
+     .heading {
+      
+      width:85%;
+      position:fixed;
+      border-radius: 15px 15px 0px 0px;
+      margin-bottom: 20px;
+      background-color: #665E58;
+      color : #fff;
+      padding: 10px 15px;
+      text-align:center;
+      }
+     .online {
+      background:#665E58;
+      border-radius: 15px 15px 0px 0px;
+      text-align:center;
+      padding: 10px 15px;
+      color: white;
+      font-weight:bold;   
+     }
+     #star {
+     color:#21FF0B;}
+     #circle {
+      color:#3C61C8;
+     }
+     #highlight {
+   font-size:15px;}
+   #userList{font-size:10px;}
+   #highlight {
+      font-weight:bold;
+      color:#4794D3;
 
-		-webkit-animation: change-color 1s ease 0s infinite normal both;
-		animation: change-color 1s ease 0s infinite normal both;
-	}
+      -webkit-animation: change-color 1s ease 0s infinite normal both;
+      animation: change-color 1s ease 0s infinite normal both;
+   }
 
-	@-webkit-keyframes change-color {
-		20%{
-			color:green;
-		}
-		100%{
-			color:red;
-		}
-	}
+   @-webkit-keyframes change-color {
+      20%{
+         color:green;
+      }
+      100%{
+         color:red;
+      }
+   }
 
-	@keyframes change-color {
-		20%{
-			color:green;
-		}
-		100%{
-			color:red;
-		}
-	}
-	#recipe{
-	background:white;
-	text-shadow:none;}
-	
+   @keyframes change-color {
+      20%{
+         color:green;
+      }
+      100%{
+         color:red;
+      }
+   }
+   
 
-	</style>
-	
-	<div class="setDiv">
+
+   </style>
+   
+   <div class="setDiv">
       <div class="mask"></div>
       <div class="window">
           <h2>대화명 설정</h2>
@@ -196,165 +194,165 @@
    </div>
   </head>
   <body>
-	<div id="top">
-		<div id="right">
-			<div class="online">
-				<a>접속중</a>
-			</div>
-			<ul id="userList" class="ul"> 
-			</ul>
-		</div>
-		<div id="left">
-			<div class="heading">
+   <div id="top">
+      <div id="right">
+         <div class="online">
+            <a>접속중</a>
+         </div>
+         <ul id="userList" class="ul"> 
+         </ul>
+      </div>
+      <div id="left">
+         <div class="heading">
                 <a>CHATTING BOX - 비룡</a>
             </div>
-			<ul id="messages">
-			</ul>
-		</div>
-	</div>
-	<div id="bottom">
-		<form action="">
-			<input id="m" autocomplete="off" /><button>Send</button>
-		</form>
-	</div>
-	<!--javascript-->
-	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script type="text/javascript">
-		$(function () {
-			var socket = io();
-			var chec = 0;
-			var typing = false;
-			
-			function wrapWindowByMask(){
-			 var maskHeight = $(document).height();
-			 var maskWidth = $(window).width();
-			 $('.mask').css({'width':maskWidth,'height':maskHeight});
-			 $('.mask').fadeIn(1000);
-			 $('.mask').fadeTo("slow",0.8);
-			 var left = ( $(window).scrollLeft() + ( $(window).width() - $('.window').width()) / 2 );
-			 var top = ( $(window).scrollTop() + ( $(window).height() - $('.window').height()) / 2 );
-			 $('.window').css({'left':left,'top':top, 'position':'absolute'});
-			 $('.window').show();
-		   }
-			wrapWindowByMask();
-		  <!-- 키보드 입력시 typing 값을 true로 바꾸고 이를 서버에 알려준다 0.5초동안 입력이 없을 시 타임아웃발생-->
-		  $('#m').keyup(function() {
-			 typing=true;
-			 if($('#m').val() == ''){socket.emit('typing', false);}
-			 else{socket.emit('typing', typing);}
-		  });
-		  <!-- 자기 자신의 메시지는 메시지보낼시 먼저 append시켜준다 -->
-		  $('form').submit(function(){
-			   socket.emit('typing', false);     
-				 var mymsg = $('#m').val();
-				 if(mymsg!= ''){
-					var now = new Date();
-					var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분" +now.getSeconds() +"초";
-					$('#messages').append($('<li id="my">').append('나'));
-					$('#messages').append($('<li id="mychat">').append(mymsg, '<p><a id="time">'+nowTime));
-					socket.emit('chat message', mymsg);
-					$('#m').val('');
-					<!--다시 커서 채팅창으로-->
-					$('#m').focus();
-					var divdiv = document.getElementById("left"); 
-					divdiv.scrollTop = divdiv.scrollHeight;
-					return false;
-				 }
-				 else{
-				 $('#m').focus();
-				 return false;
-				 }
-			});
-			
-			
-			
-			<!-- 로그인 -->
-		  $('.window .close').click(function (e) {
-			e.preventDefault();
-			if($('#username').val() != ''){
-				socket.emit('new user', $('#username').val(), function(data) {
-					if (data) {
-						chec = 1;
-						logintime=new Date();
-						$('.mask, .window').hide();
-					} 
-					else if(!data) 
-					{alert("이미 있는 닉네임 입니다.");}
-				});
-			}
-			else
-				alert("닉네임을 입력해 주세요");
-		  });
-			
-						
-			
-			
-			
-			<!-- on 부분(받는 부분)>
-			<!-- 서버로 부터 typing 메시지의 data가 false가 아닐시 유저가 타이핑 중이라는 글 출력-->
-			socket.on('typing', function(data){
-			var i, j;
-			$('#userList').text('');
-				for( i = 0 ; i < data.userList.length;i++){
-					var na = data.userList[i];
-					var c = false;
-					for(j = 0; j < data.typingList.length;j++){
-						var k = na.indexOf(data.typingList[j]);
-						if(k == 0) {c = true;}
-						//$('#userList').append($('<li>').text(data.userList[i]+'  '+data.typingList[j]+'   '+k));
-					}
-					if( c == true){ //타이핑 리스트에 있을때
-						$('#userList').append($('<li id="user">').append('<a id="circle">●</a><a id="highlight">'+data.userList[i]+'</a>'));
-					}
-					else{ // 타이핑 리스트에 없을 때
-						$('#userList').append($('<li id="user">').append('<a id="circle">●</a>'+data.userList[i]));
-					}
-				}
-			});
+         <ul id="messages">
+         </ul>
+      </div>
+   </div>
+   <div id="bottom">
+      <form action="">
+         <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+   </div>
+   <!--javascript-->
+   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+   <script type="text/javascript">
+      $(function () {
+         var socket = io();
+         var chec = 0;
+         var typing = false;
+         
+         function wrapWindowByMask(){
+          var maskHeight = $(document).height();
+          var maskWidth = $(window).width();
+          $('.mask').css({'width':maskWidth,'height':maskHeight});
+          $('.mask').fadeIn(1000);
+          $('.mask').fadeTo("slow",0.8);
+          var left = ( $(window).scrollLeft() + ( $(window).width() - $('.window').width()) / 2 );
+          var top = ( $(window).scrollTop() + ( $(window).height() - $('.window').height()) / 2 );
+          $('.window').css({'left':left,'top':top, 'position':'absolute'});
+          $('.window').show();
+         }
+         wrapWindowByMask();
+        <!-- 키보드 입력시 typing 값을 true로 바꾸고 이를 서버에 알려준다 0.5초동안 입력이 없을 시 타임아웃발생-->
+        $('#m').keyup(function() {
+          typing=true;
+          if($('#m').val() == ''){socket.emit('typing', false);}
+          else{socket.emit('typing', typing);}
+        });
+        <!-- 자기 자신의 메시지는 메시지보낼시 먼저 append시켜준다 -->
+        $('form').submit(function(){
+            socket.emit('typing', false);     
+             var mymsg = $('#m').val();
+             if(mymsg!= ''){
+               var now = new Date();
+               var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분" +now.getSeconds() +"초";
+               $('#messages').append($('<li id="my">').append('나'));
+               $('#messages').append($('<li id="mychat">').append(mymsg, '<p><a id="time">'+nowTime));
+               socket.emit('chat message', mymsg);
+               $('#m').val('');
+               <!--다시 커서 채팅창으로-->
+               $('#m').focus();
+               var divdiv = document.getElementById("left"); 
+               divdiv.scrollTop = divdiv.scrollHeight;
+               return false;
+             }
+             else{
+             $('#m').focus();
+             return false;
+             }
+         });
+         
+         
+         
+         <!-- 로그인 -->
+        $('.window .close').click(function (e) {
+         e.preventDefault();
+         if($('#username').val() != ''){
+            socket.emit('new user', $('#username').val(), function(data) {
+               if (data) {
+                  chec = 1;
+                  logintime=new Date();
+                  $('.mask, .window').hide();
+               } 
+               else if(!data) 
+               {alert("이미 있는 닉네임 입니다.");}
+            });
+         }
+         else
+            alert("닉네임을 입력해 주세요");
+        });
+         
+                  
+         
+         
+         
+         <!-- on 부분(받는 부분)>
+         <!-- 서버로 부터 typing 메시지의 data가 false가 아닐시 유저가 타이핑 중이라는 글 출력-->
+         socket.on('typing', function(data){
+         var i, j;
+         $('#userList').text('');
+            for( i = 0 ; i < data.userList.length;i++){
+               var na = data.userList[i];
+               var c = false;
+               for(j = 0; j < data.typingList.length;j++){
+                  var k = na.indexOf(data.typingList[j]);
+                  if(k == 0) {c = true;}
+                  //$('#userList').append($('<li>').text(data.userList[i]+'  '+data.typingList[j]+'   '+k));
+               }
+               if( c == true){ //타이핑 리스트에 있을때
+                  $('#userList').append($('<li id="user">').append('<a id="circle">●</a><a id="highlight">'+data.userList[i]+'</a>'));
+               }
+               else{ // 타이핑 리스트에 없을 때
+                  $('#userList').append($('<li id="user">').append('<a id="circle">●</a>'+data.userList[i]));
+               }
+            }
+         });
 
-			<!--채팅보내기-->
-			socket.on('chat message', function(msg, name){
-				if(chec == 0) return false;
-				var iname, imsg;
-				if(name === '비룡'){
-					var now = new Date();
-					var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분"+now.getSeconds() +"초";
-					$('#messages').append($("<li id='birong1'>").append('<a id="star">★</a>'+name));
-					$('#messages').append($("<li id='birong2'>").append(msg, '<p><a id="time">'+nowTime));
-				}
-				else{
-					var now = new Date();
-					var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분"+now.getSeconds() +"초";
-					$('#messages').append($('<li id="someone">').append(name));
-					$('#messages').append($('<li id="someonechat">').append(msg, '<p><a id="time">'+nowTime));
-				}
-				window.scrollTo(0, document.body.scrollHeight);
-				var divdiv = document.getElementById("left"); 
-				divdiv.scrollTop = divdiv.scrollHeight;
-			});
-
-
-			socket.on('food recipe',function(data){
-				//data.strarray[0] : 이름
-				//data.strarray[1] : 가격
-				//data.strarray[2] : 재료
-				//data.strarray[3] : 레피시
-				var stra=data.strarray[3].split('. ');
-				var testtest = '이름 : '+data.strarray[0]+'<p>가격 : '+data.strarray[1]+'<p>재료 : '+data.strarray[2]+'<p>레시피 : ';
-				for(var h = 0; h < stra.length; h++){
-					testtest = testtest +'<p>'+stra[h];
-				}
+         <!--채팅보내기-->
+         socket.on('chat message', function(msg, name){
+            if(chec == 0) return false;
+            var iname, imsg;
+            if(name === '비룡'){
+               var now = new Date();
+               var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분"+now.getSeconds() +"초";
+               $('#messages').append($("<li id='birong1'>").append('<a id="star">★</a>'+name));
+               $('#messages').append($("<li id='birong2'>").append(msg, '<p><a id="time">'+nowTime));
+            }
+            else{
+               var now = new Date();
+               var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분"+now.getSeconds() +"초";
+               $('#messages').append($('<li id="someone">').append(name));
+               $('#messages').append($('<li id="someonechat">').append(msg, '<p><a id="time">'+nowTime));
+            }
+            window.scrollTo(0, document.body.scrollHeight);
+            var divdiv = document.getElementById("left"); 
+            divdiv.scrollTop = divdiv.scrollHeight;
+         });
 
 
-				 $('#messages').append($("<li id='birong1'>").text('비룡'));
-				 $('#messages').append($("<li id='recipe'>").append(testtest));
-				var divdiv = document.getElementById("left"); 
-				divdiv.scrollTop = divdiv.scrollHeight;
-			});
+         socket.on('food recipe',function(data){
+            //data.strarray[0] : 이름
+            //data.strarray[1] : 가격
+            //data.strarray[2] : 재료
+            //data.strarray[3] : 레피시
+            var stra=data.strarray[3].split('. ');
+            var testtest = '이름 : '+data.strarray[0]+'<p>가격 : '+data.strarray[1]+'<p>재료 : '+data.strarray[2]+'<p>레시피 : ';
+            for(var h = 0; h < stra.length; h++){
+               testtest = testtest +'<p>'+stra[h];
+            }
 
-		});
-	</script>
+
+             $('#messages').append($("<li id='birong1'>").text('비룡'));
+             $('#messages').append($("<li id='birong2'>").append(testtest));
+            var divdiv = document.getElementById("left"); 
+            divdiv.scrollTop = divdiv.scrollHeight;
+         });
+
+      });
+   </script>
 </body>
  </html>

@@ -10,6 +10,9 @@ NODE JS 기반 채팅 사이트
 - JaveScript
 - HTML
 
+## 개발 툴
+- Notepad++
+
 ## 기능
 - 채팅 기능
   - 기본 채팅
